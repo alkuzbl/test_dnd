@@ -2,41 +2,50 @@ import React, { FC } from 'react';
 
 import { Grid } from '@mui/material';
 import Typography from '@mui/material/Typography';
+import { useDispatch } from 'react-redux';
 import { v1 } from 'uuid';
 
-import { CardType } from 'App';
+import { ColumnPropsType } from 'components/Column/types';
 import { ColumnItem } from 'components/ColumnItem/ColumnItem';
-
-type ColumnPropsType = {
-  title: string;
-  cards: CardType[];
-  dropItemID: string;
-  setBoard: (value: any) => void;
-};
+import { removeDropCard, setDropCard } from 'redux/slice/boards-slice';
 
 export const Column: FC<ColumnPropsType> = props => {
-  const { title, cards, dropItemID, setBoard } = props;
+  const dispatch = useDispatch();
+
+  const { title, cards, boardId } = props;
+
+  const handleOnDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleOnDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (cards.length === 0) {
+      dispatch(removeDropCard());
+      dispatch(setDropCard({ dropIndex: 0, boardId }));
+    }
+  };
 
   return (
     <Grid
-      id={dropItemID}
       item
       xs={6}
       border={1}
       borderColor="#c4c4c4"
-      height="100vh"
       padding={2}
+      onDragOver={handleOnDragOver}
+      onDrop={handleOnDrop}
     >
       <Typography variant="h4" mb={4} textAlign="center">
         {title}
       </Typography>
-      {cards.map(card => (
+      {cards.map((card, index) => (
         <ColumnItem
           key={v1()}
           title={card.title}
-          id={card.id}
-          order={card.order}
-          setBoard={setBoard}
+          boardId={boardId}
+          cardIndex={index}
+          currentCard={card}
         />
       ))}
     </Grid>

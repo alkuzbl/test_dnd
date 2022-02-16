@@ -1,33 +1,41 @@
 import React, { FC } from 'react';
 
 import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import { useDispatch } from 'react-redux';
 import { v1 } from 'uuid';
 
-type ColumnItemPropsType = {
-  title: string;
-  id: string;
-  order: number;
-  setBoard: (value: any) => void;
-};
-export const ColumnItem: FC<ColumnItemPropsType> = props => {
-  const { title, id, order, setBoard } = props;
+import { ColumnItemPropsType } from 'components/ColumnItem/types';
+import { removeDropCard, setCurrentCard, setDropCard } from 'redux/slice/boards-slice';
 
-  const handleDragStart = (e: any) => {
-    e.target.style.opacity = 0.5;
-    console.log(order);
-    setBoard([]);
+export const ColumnItem: FC<ColumnItemPropsType> = props => {
+  const { title, boardId, cardIndex, currentCard } = props;
+
+  const dispatch = useDispatch();
+
+  const handleDragStart = () => {
+    dispatch(setCurrentCard({ currentCard, boardId, cardIndex }));
   };
 
-  const handleOnDragEnd = (e: any) => {
-    e.target.style.opacity = 1;
+  const handleOnDragEnd = () => {
+    // e.target.style.boxShadow = 'none';
+  };
+
+  const handleOnDragLeave = (e: any) => {
+    e.target.style.boxShadow = 'none';
   };
 
   const handleOnDragOver = (e: any) => {
     e.preventDefault();
+    e.target.style.boxShadow = '0 4px 3px gray';
   };
+
   const handleOnDrop = (e: any) => {
     e.preventDefault();
-    console.log(order);
+    // e.target.style.boxShadow = 'none';
+
+    dispatch(removeDropCard());
+    dispatch(setDropCard({ dropIndex: cardIndex, boardId }));
   };
 
   return (
@@ -38,14 +46,15 @@ export const ColumnItem: FC<ColumnItemPropsType> = props => {
       borderColor="#c4c4c4"
       mb={2}
       draggable
-      id={id}
       onDragStart={handleDragStart}
-      onDragLeave={handleOnDragEnd}
+      onDragLeave={handleOnDragLeave}
+      onDragEnd={handleOnDragEnd}
       onDragOver={handleOnDragOver}
       onDrop={handleOnDrop}
-      onDragEnd={handleOnDragEnd}
     >
-      {title}
+      <Typography variant="h6" padding={2}>
+        {title}
+      </Typography>
     </Box>
   );
 };
